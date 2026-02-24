@@ -20,10 +20,10 @@ import JsonHighlighter from "@/components/JsonHighlighter";
 
 const SAMPLE_JSON = JSON.stringify(
   [
-    { Year: 2020, Make: "Toyota", Model: "Camry", Price: 24000 },
-    { Year: 2019, Make: "Honda", Model: "Civic", Price: 22000 },
-    { Year: 2020, Make: "Honda", Model: "Accord", Price: 26000 },
-    { Year: 2019, Make: "Toyota", Model: "Corolla", Price: 20000 },
+    { Year: 2020, Make: "Toyota", Model: "Camry", Price: 24000, class: "Sedan", "year-from": 2018, "year-to": 2022 },
+    { Year: 2019, Make: "Honda", Model: "Civic", Price: 22000, class: "Compact", "year-from": 2016, "year-to": 2021 },
+    { Year: 2020, Make: "Honda", Model: "Accord", Price: 26000, class: "Sedan", "year-from": 2018, "year-to": 2023 },
+    { Year: 2019, Make: "Toyota", Model: "Corolla", Price: 20000, class: "Compact", "year-from": 2017, "year-to": 2022 },
   ],
   null,
   2
