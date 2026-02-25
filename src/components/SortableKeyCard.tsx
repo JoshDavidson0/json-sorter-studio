@@ -5,9 +5,11 @@ import { GripVertical } from "lucide-react";
 interface SortableKeyCardProps {
   id: string;
   index: number;
+  enabled: boolean;
+  onToggle: () => void;
 }
 
-const SortableKeyCard = ({ id, index }: SortableKeyCardProps) => {
+const SortableKeyCard = ({ id, index, enabled, onToggle }: SortableKeyCardProps) => {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id });
 
@@ -33,6 +35,20 @@ const SortableKeyCard = ({ id, index }: SortableKeyCardProps) => {
       <span className="ml-auto rounded bg-muted px-2 py-0.5 text-xs text-muted-foreground font-mono">
         #{index + 1}
       </span>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.stopPropagation();
+          onToggle();
+        }}
+        className={`ml-2 rounded-full border px-2 py-0.5 text-[10px] font-medium ${
+          enabled
+            ? "border-emerald-500/40 bg-emerald-500/10 text-emerald-500"
+            : "border-border bg-muted text-muted-foreground"
+        }`}
+      >
+        {enabled ? "Using" : "Ignored"}
+      </button>
     </div>
   );
 };

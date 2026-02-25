@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import {
   DndContext,
   closestCenter,
@@ -31,13 +31,23 @@ const SAMPLE_JSON = JSON.stringify(
 
 const Index = () => {
   const [input, setInput] = useState("");
+  const [debouncedInput, setDebouncedInput] = useState("");
   const [sortedResult, setSortedResult] = useState<string | null>(null);
   const [keys, setKeys] = useState<string[]>([]);
+  const [keyConfig, setKeyConfig] = useState<Record<string, { enabled: boolean }>>({});
+
+  useEffect(() => {
+    const handle = setTimeout(() => {
+      setDebouncedInput(input);
+    }, 300);
+
+    return () => clearTimeout(handle);
+  }, [input]);
 
   const parsedData = useMemo(() => {
-    if (!input.trim()) return { valid: false, data: null, error: "" };
+    if (!debouncedInput.trim()) return { valid: false, data: null, error: "" };
     try {
-      const parsed = JSON.parse(input);
+      const parsed = JSON.parse(debouncedInput);
       if (!Array.isArray(parsed)) return { valid: false, data: null, error: "Input must be a JSON array" };
       if (parsed.length === 0) return { valid: false, data: null, error: "Array is empty" };
       if (!parsed.every((item) => typeof item === "object" && item !== null && !Array.isArray(item)))
@@ -46,22 +56,34 @@ const Index = () => {
     } catch {
       return { valid: false, data: null, error: "Invalid JSON syntax" };
     }
-  }, [input]);
+  }, [debouncedInput]);
 
   // Extract keys when data changes
-  useMemo(() => {
+  useEffect(() => {
     if (parsedData.valid && parsedData.data) {
       const allKeys = new Set<string>();
       parsedData.data.forEach((obj: Record<string, unknown>) =>
         Object.keys(obj).forEach((k) => allKeys.add(k))
       );
+      const newKeys = Array.from(allKeys);
+
       setKeys((prev) => {
-        const newKeys = Array.from(allKeys);
         // Keep existing order for keys that still exist, append new ones
         const kept = prev.filter((k) => newKeys.includes(k));
         const added = newKeys.filter((k) => !prev.includes(k));
         return [...kept, ...added];
       });
+
+      setKeyConfig((prev) => {
+        const updated: Record<string, { enabled: boolean }> = {};
+        newKeys.forEach((k) => {
+          updated[k] = { enabled: prev[k]?.enabled ?? true };
+        });
+        return updated;
+      });
+    } else {
+      setKeys([]);
+      setKeyConfig({});
     }
   }, [parsedData.valid, parsedData.data]);
 
@@ -83,8 +105,10 @@ const Index = () => {
 
   const handleSort = () => {
     if (!parsedData.valid || !parsedData.data) return;
+    const activeKeys = keys.filter((k) => keyConfig[k]?.enabled);
+
     const sorted = [...parsedData.data].sort((a, b) => {
-      for (const key of keys) {
+      for (const key of activeKeys) {
         const aVal = a[key];
         const bVal = b[key];
         if (aVal === bVal) continue;
@@ -204,7 +228,18 @@ const Index = () => {
                     <SortableContext items={keys} strategy={verticalListSortingStrategy}>
                       <div className="flex flex-col gap-2 rounded-lg border border-border bg-card p-4 min-h-[520px]">
                         {keys.map((key, i) => (
-                          <SortableKeyCard key={key} id={key} index={i} />
+                          <SortableKeyCard
+                            key={key}
+                            id={key}
+                            index={i}
+                            enabled={keyConfig[key]?.enabled ?? true}
+                            onToggle={() =>
+                              setKeyConfig((prev) => ({
+                                ...prev,
+                                [key]: { enabled: !(prev[key]?.enabled ?? true) },
+                              }))
+                            }
+                          />
                         ))}
                       </div>
                     </SortableContext>
