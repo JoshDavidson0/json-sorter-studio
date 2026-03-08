@@ -1,7 +1,7 @@
 # Welcome to your Lovable project
 
 ## Project info
-- This project was 100% vibe coded with Gemini, Lovable, and Cursor in order to gain familiarity with ai tools.
+- Gaining familiarity with Gemini, Lovable, Cursor workflow to create a JSON sorting program.
 
 **URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
 
